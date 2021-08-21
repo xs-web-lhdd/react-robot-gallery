@@ -47,16 +47,31 @@ const App: React.FC = (props) => {
 
   const [count, setCount] = useState<number>(0)
   const [robotGallery, setRobotGallery] = useState<any>([])
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string>()
 
   useEffect(() => {
     document.title = `点击了${count}次`
   }, [count])
 
-  // 不传入第二个参数useEffect会在页面每次渲染UI后执行
+  // 不传入第二个参数useEffect会在页面每次渲染UI后执行，加入[]后，useEffect只会在页面加载第一次执行
   useEffect(() => {
-    fetch('https://jsonplaceholder.typicode.com/users')
-      .then(response => response.json())
-      .then(data => setRobotGallery(data))
+    // 在useEffect里面使用async await
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        const res = await fetch('https://jsonplaceholder.typicode.com/users')
+        // .then(response => response.json())
+        // .then(data => setRobotGallery(data))
+        const data = await res.json()
+        setRobotGallery(data)
+      } catch (error) {
+        setError(error.message)
+      }
+      setLoading(false)
+    }
+
+    fetchData()
   }, [])
 
 
@@ -75,9 +90,14 @@ const App: React.FC = (props) => {
       </button>
       <span>count: {count}</span>
       <ShoppingCart />
-      <div className={styles.robotList}>
-        {robotGallery.map(r => <Robot id={r.id} name={r.name} email={r.email} />)}
-      </div>
+      {(!error || error !== '') && <div>网站出错：{error}</div>}
+      {!loading ?
+        <div className={styles.robotList}>
+          {robotGallery.map(r => <Robot id={r.id} name={r.name} email={r.email} />)}
+        </div>
+        :
+        <h2>loading加载中</h2>
+      }
     </div>
   );
 }
