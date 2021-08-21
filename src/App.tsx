@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import logo from './assets/images/logo.svg';
 import robots from './mockdata/robots.json'
 import Robot from './components/Robot'
@@ -46,6 +46,18 @@ interface State {
 const App: React.FC = (props) => {
 
   const [count, setCount] = useState<number>(0)
+  const [robotGallery, setRobotGallery] = useState<any>([])
+
+  useEffect(() => {
+    document.title = `点击了${count}次`
+  }, [count])
+
+  // 不传入第二个参数useEffect会在页面每次渲染UI后执行
+  useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/users')
+      .then(response => response.json())
+      .then(data => setRobotGallery(data))
+  }, [])
 
 
   return (
@@ -63,9 +75,9 @@ const App: React.FC = (props) => {
       </button>
       <span>count: {count}</span>
       <ShoppingCart />
-      {/* <div className={styles.robotList}>
-        {this.state.robotGallery.map(r => <Robot id={r.id} name={r.name} email={r.email} />)}
-      </div> */}
+      <div className={styles.robotList}>
+        {robotGallery.map(r => <Robot id={r.id} name={r.name} email={r.email} />)}
+      </div>
     </div>
   );
 }
